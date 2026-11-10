@@ -1,0 +1,10 @@
+{
+  "name": "api-marketplace",
+  "description": "REST API Marketplace (PHP + PDO + MySQL)",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*"
+  }
+}
