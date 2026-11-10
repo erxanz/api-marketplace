@@ -1,0 +1,540 @@
+{
+  "info": {
+    "name": "API Marketplace",
+    "description": "REST API Marketplace (PHP + PDO + MySQL)\n\nCara pakai:\n1. Jalankan server: `php -S 127.0.0.1:8000 -t public public/index.php`\n2. Import file ini ke Postman (Import → File)\n3. Login dulu (folder Auth) — token otomatis tersimpan ke variabel {{token}}\n4. Jalankan endpoint lain yang bertanda 🔒",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0. Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/health", "host": ["{{base_url}}"], "path": ["api", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login (jalankan dulu)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "    console.log('Token tersimpan');",
+                  "} else {",
+                  "    console.error('Login gagal:', json.message);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"siti@marketplace.test\",\n  \"password\": \"pembeli123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] },
+            "description": "Login sebagai pembeli. Token otomatis disimpan ke variabel {{token}}.\n\nAkun lain:\n- admin@marketplace.test / admin123\n- budi@marketplace.test / penjual123\n- andi@marketplace.test / penjual123"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@marketplace.test\",\n  \"password\": \"admin123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Penjual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@marketplace.test\",\n  \"password\": \"penjual123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"User Baru\",\n  \"email\": \"baru@mail.com\",\n  \"password\": \"secret123\",\n  \"no_hp\": \"08123456789\",\n  \"alamat\": \"Jl. Baru No. 1\",\n  \"role\": \"pembeli\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] },
+            "description": "Ganti email jika sudah terdaftar (unique). Role: pembeli / penjual"
+          }
+        },
+        {
+          "name": "Me (🔒)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/auth/me", "host": ["{{base_url}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Kategori",
+      "item": [
+        {
+          "name": "List Kategori (publik)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/kategori", "host": ["{{base_url}}"], "path": ["api", "kategori"] }
+          }
+        },
+        {
+          "name": "Detail Kategori",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/kategori/1", "host": ["{{base_url}}"], "path": ["api", "kategori", "1"] }
+          }
+        },
+        {
+          "name": "Tambah Kategori (🔒)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kategori\": \"Olahraga\",\n  \"deskripsi\": \"Perlengkapan olahraga\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/kategori", "host": ["{{base_url}}"], "path": ["api", "kategori"] }
+          }
+        },
+        {
+          "name": "Ubah Kategori (🔒)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kategori\": \"Olahraga & Outdoor\",\n  \"deskripsi\": \"Updated\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/kategori/5", "host": ["{{base_url}}"], "path": ["api", "kategori", "5"] }
+          }
+        },
+        {
+          "name": "Hapus Kategori (🔒)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/kategori/5", "host": ["{{base_url}}"], "path": ["api", "kategori", "5"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Produk",
+      "item": [
+        {
+          "name": "List Produk (publik)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/produk?page=1&per_page=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "produk"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "5" }
+              ]
+            },
+            "description": "Query opsional:\n- q = cari nama/deskripsi\n- id_kategori = filter kategori\n- id_penjual = filter penjual\n- page, per_page"
+          }
+        },
+        {
+          "name": "Cari Produk",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/produk?q=laptop&id_kategori=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "produk"],
+              "query": [
+                { "key": "q", "value": "laptop" },
+                { "key": "id_kategori", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detail Produk",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/produk/1", "host": ["{{base_url}}"], "path": ["api", "produk", "1"] }
+          }
+        },
+        {
+          "name": "Produk per Penjual",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/penjual/2/produk", "host": ["{{base_url}}"], "path": ["api", "penjual", "2", "produk"] }
+          }
+        },
+        {
+          "name": "Tambah Produk (🔒 penjual)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_produk\": \"Produk dari Postman\",\n  \"deskripsi\": \"Deskripsi produk uji\",\n  \"id_kategori\": 1,\n  \"harga\": 150000,\n  \"stok\": 10,\n  \"gambar\": \"produk-baru.png\",\n  \"status\": \"aktif\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/produk", "host": ["{{base_url}}"], "path": ["api", "produk"] },
+            "description": "Login dulu sebagai penjual (budi@marketplace.test / penjual123)"
+          }
+        },
+        {
+          "name": "Ubah Produk (🔒 owner)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_produk\": \"Produk Diubah\",\n  \"harga\": 175000,\n  \"stok\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/produk/8", "host": ["{{base_url}}"], "path": ["api", "produk", "8"] },
+            "description": "Ganti 8 dengan id produk milik penjual yang sedang login"
+          }
+        },
+        {
+          "name": "Hapus Produk (🔒 owner)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/produk/8", "host": ["{{base_url}}"], "path": ["api", "produk", "8"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Keranjang (🔒)",
+      "item": [
+        {
+          "name": "Lihat Keranjang",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/keranjang", "host": ["{{base_url}}"], "path": ["api", "keranjang"] }
+          }
+        },
+        {
+          "name": "Tambah ke Keranjang",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_produk\": 1,\n  \"jumlah\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/keranjang", "host": ["{{base_url}}"], "path": ["api", "keranjang"] }
+          }
+        },
+        {
+          "name": "Ubah Jumlah Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jumlah\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/keranjang/1", "host": ["{{base_url}}"], "path": ["api", "keranjang", "1"] },
+            "description": "1 = id_produk"
+          }
+        },
+        {
+          "name": "Hapus 1 Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/keranjang/1", "host": ["{{base_url}}"], "path": ["api", "keranjang", "1"] }
+          }
+        },
+        {
+          "name": "Kosongkan Keranjang",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/keranjang", "host": ["{{base_url}}"], "path": ["api", "keranjang"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Pesanan (🔒)",
+      "item": [
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alamat_pengiriman\": \"Jl. Postman No. 1 Jakarta\",\n  \"metode_pembayaran\": \"ewallet\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/checkout", "host": ["{{base_url}}"], "path": ["api", "checkout"] },
+            "description": "metode_pembayaran: transfer / ewallet / cod\nKeranjang harus berisi item, login sebagai pembeli"
+          }
+        },
+        {
+          "name": "List Pesanan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/pesanan",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pesanan"],
+              "query": [{ "key": "status", "value": "menunggu", "disabled": true }]
+            },
+            "description": "Query opsional: status = menunggu/diproses/dikirim/selesai/dibatalkan"
+          }
+        },
+        {
+          "name": "Detail Pesanan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/pesanan/1", "host": ["{{base_url}}"], "path": ["api", "pesanan", "1"] }
+          }
+        },
+        {
+          "name": "Update Status Pesanan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"diproses\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/pesanan/1/status", "host": ["{{base_url}}"], "path": ["api", "pesanan", "1", "status"] },
+            "description": "status: menunggu / diproses / dikirim / selesai / dibatalkan\n- Pembeli hanya bisa batalkan saat masih menunggu\n- Admin & penjual bebas ubah status\n- Membatalkan = stok produk kembali"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Users (🔒)",
+      "item": [
+        {
+          "name": "List Users (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users", "host": ["{{base_url}}"], "path": ["api", "users"] },
+            "description": "Login sebagai admin dulu"
+          }
+        },
+        {
+          "name": "Detail User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users/3", "host": ["{{base_url}}"], "path": ["api", "users", "3"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Siti Aminah\",\n  \"no_hp\": \"089876543210\",\n  \"alamat\": \"Jl. Kenanga No. 5 Bandung\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/users/3", "host": ["{{base_url}}"], "path": ["api", "users", "3"] },
+            "description": "Admin juga bisa kirim: role, status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Test Case (negatif)",
+      "item": [
+        {
+          "name": "Login password salah → 401",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"siti@marketplace.test\",\n  \"password\": \"salah\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Tanpa token → 401",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/keranjang", "host": ["{{base_url}}"], "path": ["api", "keranjang"] }
+          }
+        },
+        {
+          "name": "Token palsu → 401",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer token-palsu" }],
+            "url": { "raw": "{{base_url}}/api/keranjang", "host": ["{{base_url}}"], "path": ["api", "keranjang"] }
+          }
+        },
+        {
+          "name": "Register validasi gagal → 422",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"\",\n  \"email\": \"bukan-email\",\n  \"password\": \"123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Endpoint tidak ada → 404",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/tidak-ada", "host": ["{{base_url}}"], "path": ["api", "tidak-ada"] }
+          }
+        },
+        {
+          "name": "Pembeli akses /api/users → 403",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users", "host": ["{{base_url}}"], "path": ["api", "users"] },
+            "description": "Login sebagai pembeli dulu, bukan admin"
+          }
+        },
+        {
+          "name": "Hapus kategori terpakai → 409",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/kategori/1", "host": ["{{base_url}}"], "path": ["api", "kategori", "1"] },
+            "description": "Kategori 1 (Elektronik) punya produk → harus 409"
+          }
+        },
+        {
+          "name": "Checkout keranjang kosong → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alamat_pengiriman\": \"Jl. X\",\n  \"metode_pembayaran\": \"cod\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/checkout", "host": ["{{base_url}}"], "path": ["api", "checkout"] },
+            "description": "Pastikan keranjang kosong dulu (Kosongkan Keranjang)"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -18,6 +18,65 @@ mysql -u badio -p marketplace_db < db_marketplace.sql
 php -S 127.0.0.1:8000 -t public public/index.php
 ```
 
+## Test di Postman
+
+Collection siap import: [`postman_collection.json`](postman_collection.json)
+
+### Langkah
+
+1. **Jalankan server** dulu:
+
+   ```bash
+   php -S 127.0.0.1:8000 -t public public/index.php
+   ```
+
+2. **Import collection** ke Postman:
+   - Postman → **Import** → **Files** → pilih `postman_collection.json` → **Open**
+   - Collection **API Marketplace** muncul di sidebar, dengan variabel `base_url` = `http://127.0.0.1:8000`
+
+3. **Login dulu** (wajib untuk endpoint 🔒):
+   - Buka folder **1. Auth** → jalankan **Login (jalankan dulu)**
+   - Script otomatis menyimpan token ke variabel `{{token}}` (cek: icon *Environment quick look* 👁 di kanan atas)
+   - Bisa ganti login: **Login Admin** / **Login Penjual** (token ikut terganti)
+
+4. **Jalankan endpoint lain** — header `Authorization: Bearer {{token}}` sudah terisi otomatis di request yang bertanda 🔒.
+
+### Urutan test flow yang disarankan
+
+| No | Folder | Request | Yang dicek |
+|----|--------|---------|------------|
+| 1 | 0. Health | Health Check | Server hidup → `200` |
+| 2 | 1. Auth | Login | Dapat `token` |
+| 3 | 1. Auth | Me | Profil sesuai login |
+| 4 | 2. Kategori | List Kategori | 4 kategori |
+| 5 | 3. Produk | List / Cari / Detail | Filter `q`, `id_kategori` |
+| 6 | 4. Keranjang | Tambah → Lihat → Ubah → Hapus | Item & `total` benar |
+| 7 | 5. Pesanan | Checkout | Pesanan baru, stok produk berkurang |
+| 8 | 5. Pesanan | List + Detail | Muncul pesanan tadi |
+| 9 | 5. Pesanan | Update Status | `menunggu` → `diproses` |
+| 10 | 6. Users | List Users | Harus login **admin** dulu |
+
+### Test negatif (folder 7)
+
+| Request | Ekspektasi |
+|---------|------------|
+| Login password salah | `401` |
+| Tanpa / token palsu | `401` |
+| Register data tidak valid | `422` + `errors` per field |
+| Endpoint salah | `404` |
+| Pembeli buka `/api/users` | `403` |
+| Hategori 1 dihapus (punya produk) | `409` |
+| Checkout keranjang kosong | `409` |
+
+### Troubleshooting
+
+| Gejala | Solusi |
+|--------|--------|
+| `401 Unauthorized` | Jalankan **Login** dulu; token kedaluwarsa (24 jam) → login ulang |
+| `ECONNREFUSED` | Server belum jalan / salah port |
+| Response `Forbidden` | Role tidak cocok (contoh: butuh admin) → login ulang sebagai admin |
+| Mau lihat token sekarang | Klik **Environment quick look** 👁 → `collection → token` |
+
 ## Autentikasi
 
 Semua endpoint bertanda 🔒 butuh header:
